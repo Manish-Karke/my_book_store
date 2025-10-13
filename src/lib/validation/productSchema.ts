@@ -1,8 +1,8 @@
-import z from "zod";
+import { z } from "zod";
 
 export const productSchema = z.object({
-  name: z.string({ message: "name must be string" }),
-  image: z.instanceof(File, { message: "product image should be image" }),
-  description: z.string({ message: "product description be string" }),
-  price: z.number({ message: "product price should be a number" }),
+  name: z.string({ message: "Product name is required" }),
+  description: z.string({ message: "Product description is required" }),
+  price: z.coerce.number().min(0, "Price must be positive"),
+  image: z.any().optional(),
 });

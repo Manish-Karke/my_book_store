@@ -25,7 +25,7 @@ export const products = pgTable("products", {
   id: serial("id").primaryKey(),
   name: varchar("name", { length: 100 }).notNull(),
   image: text("image"),
-  description: text("description"),
+  description: varchar("description"),
   price: integer("price"),
   updatedAt: timestamp("updated_At").default(sql`CURRENT_TIMESTAMP`),
   createdAt: timestamp("created_At").default(sql`CURRENT_TIMESTAMP`),

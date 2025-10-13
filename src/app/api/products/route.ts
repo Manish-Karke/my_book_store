@@ -6,14 +6,14 @@ import path from "node:path";
 
 export async function POST(request: Request) {
   const data = await request.formData();
-
+  console.log(data);
   let validatedData;
   try {
     validatedData = productSchema.parse({
       name: data.get("name"),
       image: data.get("image"),
       description: data.get("description"),
-      price: data.get("price"),
+      price: Number(data.get("price")),
     });
   } catch (error) {
     return Response.json(
@@ -60,8 +60,8 @@ export async function POST(request: Request) {
     );
   }
 
-
-  return Response.json({message:"the taske has been done "},
-    {status:200}
-  )
+  return Response.json(
+    { message: `the taske has been done  as ${data}` },
+    { status: 200 }
+  );
 }
