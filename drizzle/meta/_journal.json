@@ -15,6 +15,13 @@
       "when": 1760026895859,
       "tag": "0001_confused_namorita",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1760438958710,
+      "tag": "0002_thick_micromax",
+      "breakpoints": true
     }
   ]
 }
