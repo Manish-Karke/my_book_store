@@ -3,7 +3,8 @@
 import GoogleProvider from "next-auth/providers/google";
 import { db } from "../db/db";
 import { users } from "../db/schema";
-export const AuthOptions = {
+import type { AuthOptions } from "next-auth";
+export const authOptions: AuthOptions = {
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID as string,
@@ -40,4 +41,16 @@ export const AuthOptions = {
       },
     }),
   ],
+  callbacks: {
+    session(data: any) {
+      return data;
+    },
+    jwt({ token, user }: { token: any; user: any }) {
+      if (user) {
+        token.role = user.role;
+        token.id = user.id;
+      }
+      return token;
+    },
+  },
 };
