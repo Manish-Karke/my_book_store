@@ -10,6 +10,7 @@ import CreateProductForm, { FormValues } from "./create-product-form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createProduct } from "@/http/api";
 import { useNewProduct } from "@/store/product/product-store";
+import { toast } from "sonner";
 
 const ProductSheet = () => {
   const { isOpen, onClose } = useNewProduct();
@@ -24,7 +25,7 @@ const ProductSheet = () => {
       queryClient.invalidateQueries({
         queryKey: ["products"],
       });
-      alert("product created!!!");
+      toast("product has been created ");
       onClose();
     },
   });
