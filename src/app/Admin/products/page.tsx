@@ -8,11 +8,16 @@ import { getAllProducts } from "@/http/api";
 import { Product } from "@/types";
 import ProductSheet from "./productSheet";
 import { useNewProduct } from "@/store/product/product-store";
+import { Loader2 } from "lucide-react";
 
 const ProductPage = () => {
   const { onOpen } = useNewProduct();
 
-  const { data: products } = useQuery<Product[]>({
+  const {
+    data: products,
+    isLoading,
+    isError,
+  } = useQuery<Product[]>({
     queryKey: ["products"],
     queryFn: () => getAllProducts(),
   });
@@ -29,7 +34,19 @@ const ProductPage = () => {
         <ProductSheet />
       </div>
 
-      <DataTable columns={columns} data={products || []} />
+      {isLoading ? (
+        <div className="flex items-center justify-center py-10 z-1">
+          <Loader2 className="size-10 animate-spin" />
+        </div>
+      ) : (
+        <DataTable columns={columns} data={products || []} />
+      )}
+
+      {isError && (
+        <span className="flex items-center justify-center text-red-700">
+          Something went wrong
+        </span>
+      )}
     </>
   );
 };
