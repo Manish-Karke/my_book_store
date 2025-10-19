@@ -16,7 +16,7 @@ const ProductSheet = () => {
 
   const queryClient = useQueryClient();
 
-  const { mutate } = useMutation({
+  const { mutate, isPending } = useMutation({
     mutationKey: ["create-product"],
     mutationFn: (data: FormData) => createProduct(data),
 
@@ -25,6 +25,7 @@ const ProductSheet = () => {
         queryKey: ["products"],
       });
       alert("product created!!!");
+      onClose();
     },
   });
 
@@ -46,7 +47,7 @@ const ProductSheet = () => {
           <SheetTitle>Create a product</SheetTitle>
           <SheetDescription>Create a new product</SheetDescription>
         </SheetHeader>
-        <CreateProductForm onSubmit={onSubmit} />
+        <CreateProductForm onSubmit={onSubmit} disabled={isPending} />
       </SheetContent>
     </Sheet>
   );
