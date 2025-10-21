@@ -33,19 +33,15 @@ export const products = pgTable("products", {
 });
 
 export const wareHouses = pgTable(
-  "warehouses",
+  "wareHouses",
   {
     id: serial("id").primaryKey(),
     name: varchar("name", { length: 100 }).notNull(),
     pincode: varchar("pincode", { length: 6 }).notNull(),
-    updatedAt: timestamp("updated_At").default(sql`CURRENT_TIMESTAMP`),
-    createdAt: timestamp("created_At").default(sql`CURRENT_TIMESTAMP`),
+    updatedAt: timestamp("updated_at").default(sql`CURRENT_TIMESTAMP`),
+    createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`),
   },
-  (table) => {
-    return {
-      pincodeIdx: index("pincode_idx").on(table.pincode),
-    };
-  }
+  (table) => [index("pincode_idx").on(table.pincode)]
 );
 
 export const orders = pgTable("orders", {

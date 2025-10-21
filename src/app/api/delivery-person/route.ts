@@ -1,9 +1,22 @@
+import { authOptions } from "@/lib/auth/authOpreations";
 import { db } from "@/lib/db/db";
 import { deliveryPerson, wareHouses } from "@/lib/db/schema";
 import { deliveryPersonSchema } from "@/lib/validation/deliveryPersonSchema";
 import { desc, eq } from "drizzle-orm";
+import { getServerSession } from "next-auth";
 
 export async function POST(request: Request) {
+  const session = await getServerSession(authOptions);
+
+  if (!session) {
+    return Response.json({ message: "not allowed" }, { status: 401 });
+  }
+
+  // @ts-ignore
+  if (session.token.role?.toLowerCase() !== "admin") {
+    return Response.json({ message: "not a admin" }, { status: 403 });
+  }
+
   const deliveryData = await request.json();
   let validatedData;
   try {
@@ -37,7 +50,12 @@ export async function POST(request: Request) {
 export async function GET() {
   try {
     const deliveryPersonDetail = await db
-      .select()
+      .select({
+        id: deliveryPerson.id,
+        name: deliveryPerson.name,
+        phone: deliveryPerson.phone,
+        warehouse: wareHouses.name,
+      })
       .from(deliveryPerson)
       .leftJoin(wareHouses, eq(deliveryPerson.wareHousesId, wareHouses.id))
       .orderBy(desc(deliveryPerson.id));

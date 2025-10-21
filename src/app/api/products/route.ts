@@ -1,85 +1,80 @@
+import { authOptions } from "@/lib/auth/authOpreations";
 import { db } from "@/lib/db/db";
 import { products } from "@/lib/db/schema";
-import { productSchema } from "@/lib/validation/productSchema";
+import { isServer, productSchema } from "@/lib/validation/productSchema";
 import { desc } from "drizzle-orm";
+import { getServerSession } from "next-auth/next";
 import { writeFile } from "node:fs/promises";
 import path from "node:path";
 
 export async function POST(request: Request) {
-  // check the user auth
+  const session = await getServerSession(authOptions);
+
+  if (!session) {
+    return Response.json({ message: "Not allowed" }, { status: 401 });
+  }
+  // todo: check user access.
+  // @ts-ignore
+  if (session.token.role !== "admin") {
+    return Response.json({ message: "Not allowed" }, { status: 403 });
+  }
+
   const data = await request.formData();
-  // console.log(data);
+
   let validatedData;
   try {
     validatedData = productSchema.parse({
       name: data.get("name"),
-      image: data.get("image"),
       description: data.get("description"),
       price: Number(data.get("price")),
+      image: data.get("image"),
     });
-  } catch (error) {
-    return Response.json(
-      {
-        message: error,
-      },
-      {
-        status: 404,
-      }
-    );
+  } catch (err) {
+    return Response.json({ message: err }, { status: 400 });
   }
 
-  const filename = `${Date.now()}.${validatedData.image.name
-    .split(".")
-    .slice(-1)}`;
+  const inputImage = isServer
+    ? (validatedData.image as File)
+    : (validatedData.image as FileList)[0];
+  const filename = `${Date.now()}.${inputImage.name.split(".").slice(-1)}`; // choco.png 213123123123.png
 
   try {
-    const buffer = Buffer.from(await validatedData.image.arrayBuffer());
+    const buffer = Buffer.from(await inputImage.arrayBuffer());
     await writeFile(
       path.join(process.cwd(), "public/assets", filename),
       buffer
     );
-  } catch (error) {
+  } catch (err) {
     return Response.json(
-      { message: "filed to save in fs" },
-      {
-        status: 404,
-      }
+      { message: "Failed to save the file to fs" },
+      { status: 500 }
     );
   }
 
   try {
     await db.insert(products).values({ ...validatedData, image: filename });
-  } catch (error) {
-    //todo: removing of stored image as if the opreation remains incomplete//
-    //yo man this is to be done a
+  } catch (err) {
+    // todo: remove stored image from fs
     return Response.json(
-      {
-        message: "faile to store Databse",
-      },
-      {
-        status: 500,
-      }
+      { message: "Failed to store product into the database" },
+      { status: 500 }
     );
   }
 
-  return Response.json(
-    { message: `the taske has been done  as ${data}` },
-    { status: 200 }
-  );
+  return Response.json({ message: "OK" }, { status: 201 });
 }
 
 export async function GET() {
-
- try {
-   const allProducts = await db
-    .select()
-    .from(products)
-    .orderBy(desc(products.id));
-  return Response.json(allProducts);
- } catch (error) {
-  return Response.json({
-    message:"failed to fetech data"
-  },
-{status:400})
- }
+  try {
+    const allProducts = await db
+      .select()
+      .from(products)
+      .orderBy(desc(products.id));
+    return Response.json(allProducts);
+  } catch (err) {
+    return Response.json(
+      { message: "Failed to fetch products" },
+      { status: 500 }
+    );
+  }
 }

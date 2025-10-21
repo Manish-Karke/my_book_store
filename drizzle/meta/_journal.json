@@ -15,6 +15,13 @@
       "when": 1760628258153,
       "tag": "0001_smooth_thunderbolt",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1760961489433,
+      "tag": "0002_dizzy_brood",
+      "breakpoints": true
     }
   ]
 }
