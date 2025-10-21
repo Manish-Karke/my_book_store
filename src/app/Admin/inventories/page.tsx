@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import React from "react";
 import { columns } from "./columns";
 import { useQuery } from "@tanstack/react-query";
-import {  getAllInventoriers } from "@/http/api";
+import { getAllInventoriers } from "@/http/api";
 import { Inventory } from "@/types";
 import { Loader2 } from "lucide-react";
 import { DataTable } from "../_components/data-table";

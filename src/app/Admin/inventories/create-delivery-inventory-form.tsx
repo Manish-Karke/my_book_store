@@ -21,15 +21,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { warehouse } from "@/types";
+import { Product, warehouse } from "@/types";
 import { useQuery } from "@tanstack/react-query";
-import { getAllWarehouses } from "@/http/api";
+import { getAllProducts, getAllWarehouses } from "@/http/api";
 import { inventoriesSchema } from "@/lib/validation/inventorieschema";
-
 
 export type FormValues = z.input<typeof inventoriesSchema>;
 
-const CreateDeliveryPersonForm = ({
+const CreateInventoryForm = ({
   onSubmit,
   disabled,
 }: {
@@ -40,17 +39,20 @@ const CreateDeliveryPersonForm = ({
     resolver: zodResolver(inventoriesSchema),
     defaultValues: {
       sku: "",
-     
     },
   });
 
   const {
     data: warehouses,
-    isLoading,
+    isLoading: isWarehouseLoading,
     isError,
   } = useQuery<warehouse[]>({
     queryKey: ["warehouses"],
     queryFn: () => getAllWarehouses(),
+  });
+  const { data: products, isLoading: isProductLoading } = useQuery<Product[]>({
+    queryKey: ["products"],
+    queryFn: () => getAllProducts(),
   });
 
   const handleSubmit = (values: FormValues) => {
@@ -67,25 +69,13 @@ const CreateDeliveryPersonForm = ({
             <FormItem>
               <FormLabel>Name</FormLabel>
               <FormControl>
-                <Input placeholder="e.g. John Doe" {...field} />
+                <Input placeholder="e.g. sdf15678" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        {/* <FormField
-          control={form.control}
-          name="phone"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Phone</FormLabel>
-              <FormControl>
-                <Input placeholder="e.g. +918899889988" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        /> */}
+
         <FormField
           control={form.control}
           name="wareHousesId"
@@ -102,12 +92,50 @@ const CreateDeliveryPersonForm = ({
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {isLoading ? (
+                  {isWarehouseLoading ? (
                     <SelectItem value="Loading">Loading...</SelectItem>
                   ) : (
                     <>
                       {warehouses &&
                         warehouses.map((item) => (
+                          <SelectItem
+                            key={item.id}
+                            value={item.id ? item.id?.toString() : ""}
+                          >
+                            {item.name}
+                          </SelectItem>
+                        ))}
+                    </>
+                  )}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="productId"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Warehouse ID</FormLabel>
+              <Select
+                onValueChange={(value) => field.onChange(parseInt(value))}
+                defaultValue={field.value ? field.value.toString() : ""}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select Product ID" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {isProductLoading ? (
+                    <SelectItem value="Loading">Loading...</SelectItem>
+                  ) : (
+                    <>
+                      {products &&
+                        products.map((item) => (
                           <SelectItem
                             key={item.id}
                             value={item.id ? item.id?.toString() : ""}
@@ -132,4 +160,4 @@ const CreateDeliveryPersonForm = ({
   );
 };
 
-export default CreateDeliveryPersonForm;
+export default CreateInventoryForm;

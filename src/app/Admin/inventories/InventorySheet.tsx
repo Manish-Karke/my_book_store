@@ -1,3 +1,4 @@
+
 import {
   Sheet,
   SheetContent,
@@ -7,10 +8,12 @@ import {
 } from "@/components/ui/sheet";
 import React from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createDeliveryPerson } from "@/http/api";
-import { DeliveryPerson } from "@/types";
+import { createInventories } from "@/http/api";
+import { InventoryData } from "@/types";
 import { toast } from "sonner";
-import CreateDeliveryPersonForm, { FormValues } from "./create-delivery-person-form";
+import CreateInventoryForm, {
+  FormValues,
+} from "./create-delivery-inventory-form";
 import { useNewInventory } from "@/store/inventories/inventory-store";
 
 const DeliveryPersonSheet = () => {
@@ -19,26 +22,29 @@ const DeliveryPersonSheet = () => {
 
   const { mutate, isPending } = useMutation({
     mutationKey: ["create-Inventories"],
-    mutationFn: (data: DeliveryPerson) => createDeliveryPerson(data),
+    mutationFn: (data: InventoryData) => createInventories(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["Inventories"] });
-      toast("inventory has been created");
+      queryClient.invalidateQueries({ queryKey: ["inventories"] }); // ✅ fixed
+      toast("Inventory has been created");
       onClose();
+    },
+    onError: () => {
+      toast.error("Failed to create inventory");
     },
   });
 
   const onSubmit = (values: FormValues) => {
-    mutate(values as unknown as DeliveryPerson);
+    mutate(values as InventoryData);
   };
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
       <SheetContent className="min-w-[28rem] space-y-4">
         <SheetHeader>
-          <SheetTitle>Create Delivery Person</SheetTitle>
-          <SheetDescription>Create a new delivery person</SheetDescription>
+          <SheetTitle>Create Inventory</SheetTitle>
+          <SheetDescription>Create a new Inventory</SheetDescription>
         </SheetHeader>
-        <CreateDeliveryPersonForm onSubmit={onSubmit} disabled={isPending} />
+        <CreateInventoryForm onSubmit={onSubmit} disabled={isPending} />
       </SheetContent>
     </Sheet>
   );
