@@ -4,31 +4,31 @@ import { Button } from "@/components/ui/button";
 import React from "react";
 import { columns } from "./columns";
 import { useQuery } from "@tanstack/react-query";
-import { getAllDeliveryPersons } from "@/http/api";
-import { DeliveryPerson, Product } from "@/types";
+import {  getAllInventoriers } from "@/http/api";
+import { Inventory } from "@/types";
 import { Loader2 } from "lucide-react";
-import { useNewDeliveryPerson } from "@/store/deliveryPerson/delivery-person-store";
 import { DataTable } from "../_components/data-table";
-import DeliveryPersonSheet from "./DeliveryPersonSheet";
+import DeliveryPersonSheet from "./InventorySheet";
+import { useNewInventory } from "@/store/inventories/inventory-store";
 
-const DeliveryPersonsPage = () => {
-  const { onOpen } = useNewDeliveryPerson();
+const InventoriesPage = () => {
+  const { onOpen } = useNewInventory();
 
   const {
-    data: deliveryPersons,
+    data: inventories,
     isLoading,
     isError,
-  } = useQuery<DeliveryPerson[]>({
-    queryKey: ["delivery-persons"],
-    queryFn: getAllDeliveryPersons,
+  } = useQuery<Inventory[]>({
+    queryKey: ["inventories"],
+    queryFn: getAllInventoriers,
   });
 
   return (
     <>
       <div className="flex items-center justify-between">
-        <h3 className="text-2xl font-bold tracking-tight">Delivery Persons</h3>
+        <h3 className="text-2xl font-bold tracking-tight">Inventory</h3>
         <Button size={"sm"} onClick={onOpen}>
-          Add Delivery Person
+          Add Inventory
         </Button>
         <DeliveryPersonSheet />
       </div>
@@ -40,10 +40,10 @@ const DeliveryPersonsPage = () => {
           <Loader2 className="size-10 animate-spin" />
         </div>
       ) : (
-        <DataTable columns={columns} data={deliveryPersons || []} />
+        <DataTable columns={columns} data={inventories || []} />
       )}
     </>
   );
 };
 
-export default DeliveryPersonsPage;
+export default InventoriesPage;

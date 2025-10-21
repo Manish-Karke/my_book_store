@@ -17,3 +17,10 @@ export interface DeliveryPerson {
   phone: number;
   wareHousesId: string;
 }
+
+export interface Inventory {
+  id: number;
+  sku: string;
+  wareHouseId: string;
+  productId: string;
+}
