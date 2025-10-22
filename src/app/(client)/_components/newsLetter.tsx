@@ -33,12 +33,10 @@ const NewsLetter = () => {
         </div>
         <Image
           src="/choco-bg.jpg"
-          alt="news-image"
-          width={0}
-          height={0}
+          alt="Hero Chololate"
+          fill
           className="-z-10 rounded-3xl object-cover"
         />
-
         <div className="absolute inset-0 -z-10 rounded-3xl bg-black/70" />
       </div>
     </section>
