@@ -160,7 +160,5 @@ export async function POST(request: Request, {}) {
     );
   }
 
-
   // payment==>creating invoice
-
 }
