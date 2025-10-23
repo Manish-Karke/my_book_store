@@ -2,7 +2,7 @@
 import { getSingleProduct } from "@/http/api";
 import { useQuery } from "@tanstack/react-query";
 import { useParams, usePathname } from "next/navigation";
-import React from "react";
+import React, { useMemo } from "react";
 import Navigation from "./../../_components/header";
 import Image from "next/image";
 import { Star } from "lucide-react";
@@ -28,7 +28,7 @@ import Link from "next/link";
 const SingleProduct = () => {
   const params = useParams();
   const id = params.id;
-  const pathname = usePathname()
+  const pathname = usePathname();
 
   const { data: session } = useSession();
 
@@ -51,6 +51,13 @@ const SingleProduct = () => {
     console.log("values", values);
   };
 
+  const qty = form.watch("qty");
+  const price = useMemo(() => {
+    if (product?.price) {
+      return product.price * qty;
+    }
+    return 0;
+  }, [qty, product]);
   return (
     <>
       <Navigation />
@@ -186,7 +193,7 @@ const SingleProduct = () => {
                     <Separator className="my-6 bg-brown-900" />
 
                     <div className="flex items-center justify-between">
-                      <span className="text-3xl font-semibold">$50</span>
+                      <span className="text-3xl font-semibold">${price}</span>
                       {session ? (
                         <Button type="submit">Buy Now</Button>
                       ) : (
