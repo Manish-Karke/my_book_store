@@ -12,7 +12,7 @@ export async function POST(request: Request) {
     return Response.json({ message: "not allowed" }, { status: 401 });
   }
 
-  // @ts-ignore
+  // @ts-expect-error
   if (session.token.role?.toLowerCase() !== "admin") {
     return Response.json({ message: "not a admin" }, { status: 403 });
   }

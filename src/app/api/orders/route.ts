@@ -68,11 +68,11 @@ export async function POST(request: Request, {}) {
       //crating order
       const order = await tx
         .insert(orders)
-        // @ts-ignore
+        // @ts-expect-error
         .values({
           ...validatedData,
           userId: session.token.id,
-          // @ts-ignore
+          // @ts-expect-error
           price: foundProduct[0].price * validatedData.qty,
           status: "recevied",
         })
@@ -161,4 +161,6 @@ export async function POST(request: Request, {}) {
   }
 
   // payment==>creating invoice
+
+  const paymentUrl = "";
 }

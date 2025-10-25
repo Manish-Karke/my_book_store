@@ -14,7 +14,7 @@ export async function POST(request: Request) {
     return Response.json({ message: "Not allowed" }, { status: 401 });
   }
   // todo: check user access.
-  // @ts-ignore
+  // @ts-expect-error
   if (session.token.role !== "admin") {
     return Response.json({ message: "Not allowed" }, { status: 403 });
   }
