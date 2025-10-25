@@ -45,7 +45,7 @@ const CreateInventoryForm = ({
   const {
     data: warehouses,
     isLoading: isWarehouseLoading,
-    isError,
+    
   } = useQuery<warehouse[]>({
     queryKey: ["warehouses"],
     queryFn: () => getAllWarehouses(),

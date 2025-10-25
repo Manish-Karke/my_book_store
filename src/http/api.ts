@@ -1,4 +1,4 @@
-import { DeliveryPerson, Inventory, InventoryData, warehouse } from "@/types";
+import { DeliveryPerson, InventoryData, warehouse } from "@/types";
 import { api } from "./client";
 
 export const getAllProducts = async () => {

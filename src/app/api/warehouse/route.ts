@@ -32,9 +32,9 @@ export async function POST(request: Request) {
     await db.insert(wareHouses).values(validatedData);
 
     return Response.json({ message: "OK" }, { status: 201 });
-  } catch (err) {
+  } catch (err:any) {
     return Response.json(
-      { message: "Failed to store the warehouse" },
+      { message:err.message ||"Failed to store the warehouse" },
       { status: 500 }
     );
   }
@@ -47,9 +47,9 @@ export async function GET() {
       .from(wareHouses)
       .orderBy(desc(wareHouses.id));
     return Response.json(allWarehouses);
-  } catch (err) {
+  } catch (err:any) {
     return Response.json(
-      { message: "Failed to fetch all warehouses" },
+      { message:err.message|| "Failed to fetch all warehouses" },
       { status: 500 }
     );
   }

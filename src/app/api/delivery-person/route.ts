@@ -24,7 +24,7 @@ export async function POST(request: Request) {
   } catch (error) {
     return Response.json(
       {
-        message: "error form post deliveryPerson Schema",
+        error: error,
       },
       {
         status: 400,
@@ -43,7 +43,12 @@ export async function POST(request: Request) {
       }
     );
   } catch (error) {
-    return Response.json({ message: "failed to store the delivery-person" });
+    return Response.json(
+      {
+        error: error,
+      },
+      { status: 400 }
+    );
   }
 }
 
@@ -63,7 +68,7 @@ export async function GET() {
   } catch (error) {
     return Response.json(
       {
-        message: "failed to feteched data",
+        error: error,
       },
       { status: 400 }
     );

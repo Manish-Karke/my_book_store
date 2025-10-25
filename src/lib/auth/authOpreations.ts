@@ -1,17 +1,17 @@
-// import NextAuth from "next-auth"
-
 import GoogleProvider from "next-auth/providers/google";
 import { db } from "../db/db";
 import { users } from "../db/schema";
-import type { AuthOptions } from "next-auth";
+import type { AuthOptions, Profile, Account, User, Session } from "next-auth";
+import type { JWT } from "next-auth/jwt";
+
 export const authOptions: AuthOptions = {
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID as string,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
-      async profile(profile: any, token: any) {
+      async profile(profile: any, tokens: any) {
         console.log("profile", profile);
-        console.log("tokens", token);
+        console.log("tokens", tokens);
 
         const data = {
           fname: profile.given_name,
@@ -28,6 +28,7 @@ export const authOptions: AuthOptions = {
             .values(data)
             .onConflictDoUpdate({ target: users.email, set: data })
             .returning();
+
           return {
             ...data,
             name: data.fname,
@@ -35,19 +36,21 @@ export const authOptions: AuthOptions = {
             role: user[0].role,
           };
         } catch (error) {
-          console.log(error);
-          return { id: " " };
+          console.error("Error saving user:", error);
+          return { id: "" };
         }
       },
     }),
   ],
   callbacks: {
-    session(data: any) {
-      return data;
+    async session({ session, token }: { session: Session; token: JWT }) {
+      // Add custom fields to session
+      (session as any).token = token;
+      return session;
     },
-    jwt({ token, user }: { token: any; user: any }) {
+    async jwt({ token, user }: { token: JWT; user?: User }) {
       if (user) {
-        token.role = user.role;
+        token.role = (user as any).role;
         token.id = user.id;
       }
       return token;

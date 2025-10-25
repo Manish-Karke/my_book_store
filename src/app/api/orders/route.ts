@@ -10,36 +10,25 @@ import {
 import { orderSchema } from "@/lib/validation/orderSchema";
 import { and, eq, inArray, isNull } from "drizzle-orm";
 import { getServerSession } from "next-auth";
-import { tr } from "zod/v4/locales";
 
-export async function POST(request: Request, {}) {
+export async function POST(request: Request) {
   const session = await getServerSession(authOptions);
-  console.log(session);
   if (!session) {
-    return Response.json(
-      {
-        message: "not allowed",
-      },
-      {
-        status: 401,
-      }
-    );
+    return Response.json({ message: "not allowed" }, { status: 401 });
   }
-  const requestData = await request.json();
-  let validatedData;
 
+  const requestData = await request.json();
+
+  let validatedData;
   try {
     validatedData = await orderSchema.parse(requestData);
   } catch (error) {
+    console.error("Validation Error:", error);
     return Response.json(
-      { message: "this iss the error from the order" },
-      {
-        status: 404,
-      }
+      { message: "Validation failed for order data" },
+      { status: 400 }
     );
   }
-
-  console.log("validated deta", validatedData);
 
   const warehouseResult = await db
     .select({ id: wareHouses.id })
@@ -60,29 +49,32 @@ export async function POST(request: Request, {}) {
     return Response.json({ message: "No product found" }, { status: 400 });
   }
 
-  let transcationError: String = "";
-  //starting of transcation
-  let finalOrder: any;
+  let transcationError = "";
+  let finalOrder: unknown;
+
+  // normalize values TypeScript can't infer from runtime checks
+  const userId = (session as any)?.token?.id ?? (session.user as any)?.id;
+  const product = foundProduct[0];
+
   try {
     finalOrder = await db.transaction(async (tx) => {
-      //crating order
+      // creating order
+
       const order = await tx
         .insert(orders)
-        // @ts-expect-error
         .values({
           ...validatedData,
-          userId: session.token.id,
-          // @ts-expect-error
-          price: foundProduct[0].price * validatedData.qty,
-          status: "recevied",
+          userId,
+          price: (product?.price ?? 0) * validatedData.qty,
+          status: "received",
         })
         .returning({
           id: orders.id,
           price: orders.price,
         });
 
-      //checking the stocks"
-      const avaliableStock = await tx
+      // checking stocks
+      const availableStock = await tx
         .select()
         .from(inventories)
         .where(
@@ -95,14 +87,14 @@ export async function POST(request: Request, {}) {
         .limit(validatedData.qty)
         .for("update", { skipLocked: true });
 
-      if (avaliableStock.length < validatedData.qty) {
-        transcationError = `stock is low and ${avaliableStock.length} is only avaliable`;
+      if (availableStock.length < validatedData.qty) {
+        transcationError = `Stock is low; only ${availableStock.length} available`;
         tx.rollback();
         return;
       }
 
-      //checking delilvery person
-      const avaliablePerson = await tx
+      // checking delivery person
+      const availablePerson = await tx
         .select()
         .from(deliveryPerson)
         .where(
@@ -114,32 +106,30 @@ export async function POST(request: Request, {}) {
         .for("update")
         .limit(1);
 
-      if (!avaliablePerson.length) {
-        transcationError = `Delivery person will be avaliable shortly`;
+      if (!availablePerson.length) {
+        transcationError = "Delivery person will be available shortly";
         tx.rollback();
         return;
       }
 
-      //stock and deliveryperson is avaliable
-      //updatinf inventories table and orderID
+      // update inventories
       await tx
         .update(inventories)
         .set({ orderId: order[0].id })
         .where(
           inArray(
             inventories.id,
-            avaliableStock.map((stock) => stock.id)
+            availableStock.map((stock) => stock.id)
           )
         );
 
-      //update delivery person
+      // assign delivery person
       await tx
         .update(deliveryPerson)
         .set({ orderId: order[0].id })
-        .where(eq(deliveryPerson.id, avaliablePerson[0].id));
+        .where(eq(deliveryPerson.id, availablePerson[0].id));
 
-      //update the order
-
+      // update order status
       await tx
         .update(orders)
         .set({ status: "reserved" })
@@ -147,20 +137,22 @@ export async function POST(request: Request, {}) {
 
       return order[0];
     });
+
+    // ✅ Use finalOrder to prevent unused var warning
+    return Response.json(
+      { message: "Order successfully created", order: finalOrder },
+      { status: 200 }
+    );
   } catch (error) {
+    console.error("Transaction Error:", error);
     return Response.json(
       {
-        message: transcationError
-          ? transcationError
-          : "error during transcation",
+        message: transcationError || "Error during transaction",
       },
-      {
-        status: 500,
-      }
+      { status: 500 }
     );
   }
 
-  // payment==>creating invoice
-
-  const paymentUrl = "";
+  // If you implement payment later, then use paymentUrl
+  // const paymentUrl = "https://example-payment.com";
 }

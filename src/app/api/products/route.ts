@@ -44,19 +44,19 @@ export async function POST(request: Request) {
       path.join(process.cwd(), "public/assets", filename),
       buffer
     );
-  } catch (err) {
+  } catch (err: any) {
     return Response.json(
-      { message: "Failed to save the file to fs" },
+      { message: err.message || "Failed to save the file to fs" },
       { status: 500 }
     );
   }
 
   try {
     await db.insert(products).values({ ...validatedData, image: filename });
-  } catch (err) {
+  } catch (err: any) {
     // todo: remove stored image from fs
     return Response.json(
-      { message: "Failed to store product into the database" },
+      { message: err.message || "Failed to store product into the database" },
       { status: 500 }
     );
   }
@@ -71,9 +71,9 @@ export async function GET() {
       .from(products)
       .orderBy(desc(products.id));
     return Response.json(allProducts);
-  } catch (err) {
+  } catch (err: any) {
     return Response.json(
-      { message: "Failed to fetch products" },
+      { message: err.message || "Failed to fetch products" },
       { status: 500 }
     );
   }

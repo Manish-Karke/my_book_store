@@ -5,43 +5,23 @@ import { desc, eq } from "drizzle-orm";
 
 export async function POST(request: Request) {
   const requestData = await request.json();
-  let validatedData;
 
   try {
-    validatedData = await inventoriesSchema.parse(requestData);
-    console.log(validatedData);
-  } catch (error) {
+    const validatedData = await inventoriesSchema.parse(requestData);
+    const insertedData = await db.insert(inventories).values(validatedData);
+    return Response.json({ message: insertedData }, { status: 200 });
+  } catch (err: any) {
+    console.error("POST Error:", err);
     return Response.json(
-      { message: "this iss the error from the inventories" },
-      {
-        status: 404,
-      }
-    );
-  }
-
-  try {
-    const data = await db.insert(inventories).values(validatedData);
-    return Response.json(
-      {
-        message: "ok",
-      },
-      {
-        status: 200,
-      }
-    );
-  } catch (error) {
-    return Response.json(
-      {
-        message: error,
-      },
+      { error: err.message || "Failed to insert inventory" },
       { status: 500 }
     );
   }
 }
 
-export async function GET(request: Request) {
+export async function GET() {
   try {
-    const inventors = await db
+    const inventoriesData = await db
       .select({
         id: inventories.id,
         sku: inventories.sku,
@@ -52,8 +32,13 @@ export async function GET(request: Request) {
       .orderBy(desc(inventories.id))
       .leftJoin(wareHouses, eq(inventories.wareHousesId, wareHouses.id))
       .leftJoin(products, eq(inventories.productId, products.id));
-    return Response.json(inventors);
-  } catch (error) {
-    return Response.json({ message: "thsi error is fronm the " });
+
+    return Response.json(inventoriesData);
+  } catch (err: any) {
+    console.error("GET Error:", err);
+    return Response.json(
+      { message: err.message || "Error fetching inventories" },
+      { status: 500 }
+    );
   }
 }

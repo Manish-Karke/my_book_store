@@ -5,7 +5,7 @@ import React from "react";
 import { columns } from "./columns";
 import { useQuery } from "@tanstack/react-query";
 import { getAllDeliveryPersons } from "@/http/api";
-import { DeliveryPerson, Product } from "@/types";
+import { DeliveryPerson } from "@/types";
 import { Loader2 } from "lucide-react";
 import { useNewDeliveryPerson } from "@/store/deliveryPerson/delivery-person-store";
 import { DataTable } from "../_components/data-table";
