@@ -1,7 +1,7 @@
 import GoogleProvider from "next-auth/providers/google";
 import { db } from "../db/db";
 import { users } from "../db/schema";
-import type { AuthOptions, Profile, Account, User, Session } from "next-auth";
+import type { AuthOptions, User, Session } from "next-auth";
 import type { JWT } from "next-auth/jwt";
 
 export const authOptions: AuthOptions = {
@@ -45,10 +45,7 @@ export const authOptions: AuthOptions = {
   callbacks: {
     async session({ session, token }: { session: Session; token: JWT }) {
       // Add custom fields to session
-      if (token) {
-        (session as any).user.id = token.id;
-        (session as any).user.role = token.role;
-      }
+      (session as any).token = token;
       return session;
     },
     async jwt({ token, user }: { token: JWT; user?: User }) {
@@ -59,12 +56,4 @@ export const authOptions: AuthOptions = {
       return token;
     },
   },
-  pages: {
-    signIn: '/auth/signin',  // Optional: custom sign-in page
-    error: '/auth/error',     // Optional: custom error page
-  },
-  session: {
-    strategy: "jwt",
-  },
-  secret: process.env.NEXTAUTH_SECRET,
 };
