@@ -45,7 +45,10 @@ export const authOptions: AuthOptions = {
   callbacks: {
     async session({ session, token }: { session: Session; token: JWT }) {
       // Add custom fields to session
-      (session as any).token = token;
+      if (token) {
+        (session as any).user.id = token.id;
+        (session as any).user.role = token.role;
+      }
       return session;
     },
     async jwt({ token, user }: { token: JWT; user?: User }) {
@@ -56,4 +59,12 @@ export const authOptions: AuthOptions = {
       return token;
     },
   },
+  pages: {
+    signIn: '/auth/signin',  // Optional: custom sign-in page
+    error: '/auth/error',     // Optional: custom error page
+  },
+  session: {
+    strategy: "jwt",
+  },
+  secret: process.env.NEXTAUTH_SECRET,
 };
