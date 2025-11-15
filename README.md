@@ -1,4 +1,4 @@
-# Chocos – Modern Book Store App
+# Chocos – Modern chocos App
 
 A full-stack, high-performance e-commerce style application built with **Next.js 15**, **React 19**, **Drizzle ORM**, **PostgreSQL**, and **React Query**.  
 Chocos allows users to browse books, manage a cart, handle authentication, and perform admin-level operations.
